@@ -89,6 +89,17 @@ locals {
       rule_type                = "NO_SNAT"
       internal_address         = "192.168.0.0/24"
       snat_destination_address = "192.168.0.0/24"
+    },
+    {
+      name               = "inbound_nat_ssh"
+      rule_type          = "DNAT"
+      external_address   = "123.234.123.236"
+      internal_address   = "192.168.0.150"
+      dnat_external_port = "10022"
+      app_port_profile = {
+        name  = "SSH"
+        scope = "SYSTEM"
+      }
     }
   ]
 }
