@@ -25,6 +25,7 @@ No modules.
 | Name | Type |
 |------|------|
 | [vcd_nsxt_nat_rule.nsxt_nat_rule](https://registry.terraform.io/providers/vmware/vcd/latest/docs/resources/nsxt_nat_rule) | resource |
+| [vcd_nsxt_app_port_profile.nsxt_app_port_profile](https://registry.terraform.io/providers/vmware/vcd/latest/docs/data-sources/nsxt_app_port_profile) | data source |
 | [vcd_nsxt_edgegateway.nsxt_edgegateway](https://registry.terraform.io/providers/vmware/vcd/latest/docs/data-sources/nsxt_edgegateway) | data source |
 | [vcd_vdc_group.vdc_group](https://registry.terraform.io/providers/vmware/vcd/latest/docs/data-sources/vdc_group) | data source |
 
@@ -37,7 +38,7 @@ No modules.
 | <a name="input_vdc_edgegateway_name"></a> [vdc\_edgegateway\_name](#input\_vdc\_edgegateway\_name) | The name for the Edge Gateway. | `string` | n/a | yes |
 | <a name="input_vdc_group_name"></a> [vdc\_group\_name](#input\_vdc\_group\_name) | The name of the VDC group. | `string` | n/a | yes |
 | <a name="input_vdc_org_name"></a> [vdc\_org\_name](#input\_vdc\_org\_name) | The name of the organization to use. | `string` | n/a | yes |
-| <a name="input_app_port_profile_id"></a> [app\_port\_profile\_id](#input\_app\_port\_profile\_id) | Application Port Profile to which to apply the rule. The Application Port Profile includes a port, and a protocol that the incoming traffic uses on the edge gateway to connect to the internal network. Can be looked up using vcd\_nsxt\_app\_port\_profile data source or created using vcd\_nsxt\_app\_port\_profile resource. | `string` | `null` | no |
+| <a name="input_app_port_profile"></a> [app\_port\_profile](#input\_app\_port\_profile) | Application Port Profile and its scope to which to apply the rule. The Application Port Profile includes a port, and a protocol that the incoming traffic uses on the edge gateway to connect to the internal network. | `map(string)` | `null` | no |
 | <a name="input_description"></a> [description](#input\_description) | A description for the NAT rule. | `string` | `null` | no |
 | <a name="input_dnat_external_port"></a> [dnat\_external\_port](#input\_dnat\_external\_port) | For DNAT only. This represents the external port number or port range when doing DNAT port forwarding from external to internal. The default dnatExternalPort is “ANY” meaning traffic on any port for the given IPs selected will be translated. | `number` | `null` | no |
 | <a name="input_enabled"></a> [enabled](#input\_enabled) | Enables or disables the NAT rule. | `bool` | `true` | no |
@@ -61,7 +62,7 @@ No modules.
 
 ```
 module "nat_rule" {
-  source               = "git::https://github.com/noris-network/terraform-vcd-nsxt-nat-rule?ref=1.0.0"
+  source               = "git::https://github.com/noris-network/terraform-vcd-nsxt-nat-rule?ref=1.0.1"
   name                 = "outbound_snat"
   vdc_org_name         = "1-2"
   vdc_group_name       = "1-2-nbg"
@@ -84,16 +85,16 @@ locals {
       internal_address = "192.168.0.0/24"
     },
     {
-      name             = "no_snat_192.168.0.0/24"
-      rule_type        = "NO_SNAT"
-      external_address = "192.168.0.0/24"
-      internal_address = "192.168.0.0/24"
+      name                     = "no_snat-192.168.0.0/24"
+      rule_type                = "NO_SNAT"
+      internal_address         = "192.168.0.0/24"
+      snat_destination_address = "192.168.0.0/24"
     }
   ]
 }
 
 module "nat_rules" {
-  source               = "git::https://github.com/noris-network/terraform-vcd-nsxt-nat-rule?ref=1.0.0"
+  source               = "git::https://github.com/noris-network/terraform-vcd-nsxt-nat-rule?ref=1.0.1"
   for_each             = { for nat_rule in locals.nat_rules : nat_rule.name => nat_rule }
   name                 = "${each.value.name}_${terraform.workspace}"
   vdc_org_name         = var.vdc_org_name
@@ -104,3 +105,8 @@ module "nat_rules" {
   internal_address     = try(each.value.internal_address, null)
 }
 ```
+
+## Changelog
+
+  * `v1.0.1`  - Gather ID for Application Port Profiles
+  * `v1.0.0`  - Initial release

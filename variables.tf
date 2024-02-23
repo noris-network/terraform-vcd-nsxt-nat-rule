@@ -47,9 +47,9 @@ variable "internal_address" {
   default     = null
 }
 
-variable "app_port_profile_id" {
-  description = "Application Port Profile to which to apply the rule. The Application Port Profile includes a port, and a protocol that the incoming traffic uses on the edge gateway to connect to the internal network. Can be looked up using vcd_nsxt_app_port_profile data source or created using vcd_nsxt_app_port_profile resource."
-  type        = string
+variable "app_port_profile" {
+  description = "Application Port Profile and its scope to which to apply the rule. The Application Port Profile includes a port, and a protocol that the incoming traffic uses on the edge gateway to connect to the internal network."
+  type        = map(string)
   default     = null
 }
 
